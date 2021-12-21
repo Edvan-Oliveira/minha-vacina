@@ -79,15 +79,15 @@ Esse vídeo demonstrativo descreve a principal função do sistema Minha Vacina.
 
 ## 💻 Minha Vacina Web
 
-<div>
-    <img src="./images/WEB/login.png" alt="Login" height="250px">
-    <img src="./images/WEB/cadastro-Campanha.png" alt="Cadastro campanha" height="250px">
-    <img src="./images/WEB/cadastro-Local.png" alt="Cadastro de local" height="250px">
-    <img src="./images/WEB/campanhas-Ativas.png" alt="Campanhas ativas" height="250px">
-    <img src="./images/WEB/campanhas-Inativas.png" alt="Detalhes Inativas" height="250px">
-    <img src="./images/WEB/detalhes-Campanha.png" alt="Detalhes campanha "height="250px">
-    <img src="./images/WEB/edicao-Campanha.png" alt="Detalhe vacina" height="250px">
-    <img src="./images/WEB/finalizar-Campanha.png" alt="Finalizar Campanha" height="250px">
+<div style="display: flex; flex-wrap: wrap;">
+    <img src="./images/WEB/login.png" alt="Login" height="200px">
+    <img src="./images/WEB/cadastro-Campanha.png" alt="Cadastro campanha" height="200px">
+    <img src="./images/WEB/cadastro-Local.png" alt="Cadastro de local" height="200px">
+    <img src="./images/WEB/campanhas-Ativas.png" alt="Campanhas ativas" height="200px">
+    <img src="./images/WEB/campanhas-Inativas.png" alt="Detalhes Inativas" height="200px">
+    <img src="./images/WEB/detalhes-Campanha.png" alt="Detalhes campanha "height="200px">
+    <img src="./images/WEB/edicao-Campanha.png" alt="Detalhe vacina" height="200px">
+    <img src="./images/WEB/finalizar-Campanha.png" alt="Finalizar Campanha" height="200px">
 </div>
 
 <br/>
