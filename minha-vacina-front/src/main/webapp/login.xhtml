@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+    <h:outputStylesheet library="webjars" name="font-awesome/5.12.0/css/all.min-jsf.css"/>
+    <h:outputStylesheet library="webjars" name="font-awesome/5.12.0/css/v4-shims.min-jsf.css"/>
+    <h:outputStylesheet library="css" name="login.css"/>
+    <title>Minha Vacina</title>
+</h:head>
+<h:body>
+
+    <p:growl id="mensagens"/>
+
+    <div class="container">
+        <div class="container-titulo">
+            <p:outputLabel value="Autenticação" styleClass="titulo"/>
+        </div>
+
+        <h:form id="formLogin">
+            <div class="agrupador-input">
+                <p:outputLabel for="email" value="Email" styleClass="label"/>
+                <p:inputText id="email" styleClass="input" required="true" requiredMessage="O email é obrigatório"
+                             value="#{loginView.loginDTO.email}"/>
+            </div>
+
+            <div class="agrupador-input">
+                <p:outputLabel for="senha" value="Senha" styleClass="label"/>
+                <p:password id="senha" styleClass="input" toggleMask="true" required="true"
+                            requiredMessage="A senha é obrigatória" value="#{loginView.loginDTO.senha}"/>
+            </div>
+
+            <div>
+                <p:commandButton icon="fa fa-lock" value="Acessar" styleClass="botao"
+                                 action="#{loginView.realizarLogin}" update="mensagens"/>
+            </div>
+        </h:form>
+    </div>
+</h:body>
+</html>

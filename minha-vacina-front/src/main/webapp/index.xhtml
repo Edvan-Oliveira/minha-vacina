@@ -1,0 +1,567 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+    <title>Minha Vacina</title>
+    <h:outputStylesheet library="webjars" name="font-awesome/5.12.0/css/all.min-jsf.css"/>
+    <h:outputStylesheet library="webjars" name="font-awesome/5.12.0/css/v4-shims.min-jsf.css"/>
+    <h:outputStylesheet library="webjars" name="primeflex/2.0.0/primeflex.min.css"/>
+    <h:outputStylesheet library="webjars" name="primeflex/2.0.0/primeflex.css"/>
+    <h:outputStylesheet library="css" name="index.css"/>
+</h:head>
+<h:body>
+    <f:metadata>
+        <f:viewAction action="#{campanhaView.carregarDadosdaTela}"/>
+    </f:metadata>
+
+    <div class="cabecalho">
+        <div class="container-logo">
+            <h:graphicImage library="imagens" name="logo.png" styleClass="logo"/>
+            <p:outputLabel value="Minha Vacina" id="titulo-logo"/>
+        </div>
+        <p:commandButton icon="fa fa-share-square-o" value="Sair" styleClass="btn-sair"
+                         action="#{campanhaView.sair}"/>
+    </div>
+    <p:separator style="margin-bottom: 40px"/>
+
+    <p:growl id="mensagem"/>
+
+    <div class="nova-campanha-filtro-ativas-inativas">
+        <p:commandButton icon="fa fa-plus" value="Nova Campanha" onclick="PF('dlgCadastroCampanha').show()"/>
+        <h:form id="formFiltroCampanhas">
+            <div class="filtro-campanhas">
+                <div class="label-filtro">
+                    <p:outputLabel for="statusFiltroCampanhas" value="Filtrar campanhas: "/>
+                </div>
+
+                <p:selectOneRadio id="statusFiltroCampanhas" value="#{campanhaView.statusListaCampanhas}">
+                    <f:selectItem itemValue="#{true}" itemLabel="Ativas"/>
+                    <f:selectItem itemValue="#{false}" itemLabel="Inativas"/>
+                    <p:ajax listener="#{campanhaView.eventoAjaxListarCampanhasAtivasOuInativas}"
+                            update=":formTabCampanhas:tabCampanhas"/>
+                </p:selectOneRadio>
+            </div>
+        </h:form>
+    </div>
+
+    <div class="tabela-campanhas">
+        <h:form id="formTabCampanhas">
+            <p:dataTable id="tabCampanhas" widgetVar="tabCampanhas" paginator="true" paginatorPosition="bottom"
+                         emptyMessage="Nenhuma campanha encontrada" value="#{campanhaView.listaDeCampanhas}"
+                         var="campanha" rows="15" filteredValue="#{campanhaView.filtroDaListaDeCampanhas}">
+
+                <f:facet name="header">
+                    <div class="p-d-flex p-jc-end">
+                        <p:inputText id="globalFilter" onkeyup="PF('tabCampanhas').filter()"
+                                     style="width: 300px;"
+                                     placeholder="Faça uma pesquisa por qualquer campo"/>
+                    </div>
+                </f:facet>
+
+                <p:column headerText="Nome" style="width: 20%" sortBy="#{campanha.nome}" filterBy="#{campanha.nome}"
+                          filterStyle="display: none;">
+                    <p:outputLabel value="#{campanha.nome}"/>
+                </p:column>
+
+                <p:column headerText="Data Início" sortBy="#{campanha.dataInicio}" filterBy="#{campanha.dataInicio}"
+                          filterStyle="display: none;">
+                    <p:outputLabel value="#{campanhaView.formatarDataParaVisualizacao(campanha.dataInicio)}"/>
+                </p:column>
+
+                <p:column headerText="Data Termino" sortBy="#{campanha.dataFim}" filterBy="#{campanha.dataFim}"
+                          filterStyle="display: none;">
+                    <p:outputLabel value="#{campanhaView.formatarDataParaVisualizacao(campanha.dataFim)}"/>
+                </p:column>
+
+                <p:column headerText="Idade Mínima" sortBy="#{campanha.idadeMinima}" filterBy="#{campanha.idadeMinima}"
+                          filterStyle="display: none;">
+                    <p:outputLabel value="#{campanhaView.formatarIdadeParaVisualizacao(campanha.idadeMinima)}"/>
+                </p:column>
+
+                <p:column headerText="Idade Máxima" sortBy="#{campanha.idadeMaxima}" filterBy="#{campanha.idadeMaxima}"
+                          filterStyle="display: none;">
+                    <p:outputLabel value="#{campanhaView.formatarIdadeParaVisualizacao(campanha.idadeMaxima)}"/>
+                </p:column>
+
+                <p:column headerText="Município" sortBy="#{campanha.municipio.nome}"
+                          filterBy="#{campanha.municipio.nome}" filterStyle="display: none;">
+                    <p:outputLabel value="#{campanha.municipio.nome}"/>
+                </p:column>
+
+                <p:column headerText="Vacina" sortBy="#{campanha.vacina.nome}" filterBy="#{campanha.vacina.nome}"
+                          filterStyle="display: none;">
+                    <p:outputLabel value="#{campanha.vacina.nome}"/>
+                </p:column>
+
+                <p:column headerText="Detalhes">
+                    <p:commandButton icon="fa fa-align-justify" styleClass="icone-detalhe" update="formDetalheCampanha"
+                                     action="#{campanhaView.abrirDialogoDetalheCampanha}">
+                        <f:setPropertyActionListener target="#{campanhaView.campanha.id}" value="#{campanha.id}"/>
+                    </p:commandButton>
+                </p:column>
+
+                <p:column headerText="Editar">
+                    <p:commandButton icon="fa fa-pencil" styleClass="icone-editar"
+                                     update=":formAtualizaCampanha"
+                                     action="#{campanhaView.abrirDialogoAtualizarCampanha}">
+                        <f:setPropertyActionListener target="#{campanhaView.campanha.id}" value="#{campanha.id}"/>
+                    </p:commandButton>
+                </p:column>
+
+                <p:column headerText="Finalizar">
+                    <p:commandButton icon="fa fa-unlock" styleClass="icone-remover" rendered="#{campanha.ativa}"
+                                     onclick="PF('dlgConfirmacaoFinalizarCampanha').show()">
+                        <f:setPropertyActionListener target="#{campanhaView.campanha.id}" value="#{campanha.id}"/>
+                    </p:commandButton>
+
+                    <p:commandButton icon="fa fa-lock" styleClass="icone-remover"
+                                     rendered="#{!campanha.ativa}"/>
+                </p:column>
+
+            </p:dataTable>
+        </h:form>
+    </div>
+
+    <p:dialog id="dlgCadastroCampanha" widgetVar="dlgCadastroCampanha" modal="true" resizable="false"
+              header="Cadastro de Campanha" closable="false" height="80vh" width="90vw">
+        <h:form id="formCadastroCampanha">
+            <p:outputPanel styleClass="agrupamento-input">
+                <p:outputLabel for="nomeCadastro" value="Nome" styleClass="margin-label-bottom"/>
+                <p:inputText id="nomeCadastro" required="true" style="width: 100%;"
+                             requiredMessage="Nome da campanha é obrigatório"
+                             value="#{campanhaView.campanha.nome}"/>
+            </p:outputPanel>
+            <p:outputPanel styleClass="agrupamento-input">
+                <p:outputPanel>
+                    <p:outputLabel for="descricaoCadastro" value="Descrição" styleClass="margin-label-bottom"/>
+                    <p:inputTextarea id="descricaoCadastro" autoResize="true" styleClass="campo-descricao"
+                                     required="true"
+                                     requiredMessage="Descrição da campanha é obrigatório"
+                                     value="#{campanhaView.campanha.descricao}"/>
+                </p:outputPanel>
+            </p:outputPanel>
+
+            <div class="agrupar-select">
+                <div class="componente-flex">
+                    <p:outputLabel for="municipioCadastro" value="Município" styleClass="margin-label-bottom"/>
+                    <p:selectOneMenu id="municipioCadastro" filter="true" styleClass="selects"
+                                     filterMatchMode="contains" required="true"
+                                     requiredMessage="Município da campanha é obrigatório"
+                                     value="#{campanhaView.campanha.municipio.id}">
+                        <f:selectItem itemLabel="Selecione um município" itemDisabled="true"/>
+                        <f:selectItems value="#{campanhaView.listaDeMunicipios}" var="municipio"
+                                       itemLabel="#{municipio.nome}" itemValue="#{municipio.id}"/>
+                        <p:ajax process="@this" update="@this localCadastro, btnAdicionaLocal, btnNovoLocal"/>
+                    </p:selectOneMenu>
+                </div>
+
+                <div class="componente-flex">
+                    <p:outputLabel for="vacinaCadastro" value="Vacina" styleClass="margin-label-bottom"/>
+                    <p:selectOneMenu id="vacinaCadastro" styleClass="selects" filter="true" filterMatchMode="contains"
+                                     required="true" requiredMessage="Vacina da campanha é obrigatório"
+                                     value="#{campanhaView.campanha.vacina.id}">
+                        <f:selectItem itemLabel="Selecione uma vacina" itemValue="#{null}"/>
+                        <f:selectItems value="#{campanhaView.listaDeVacinas}" var="vacina" itemLabel="#{vacina.nome}"
+                                       itemValue="#{vacina.id}"/>
+                    </p:selectOneMenu>
+                </div>
+            </div>
+
+            <div class="agrupar-opicional">
+                <div class="campo-opcional">
+                    <p:outputLabel for="dataInicioCadastro" value="Data de inicío" styleClass="margin-label-bottom"/>
+                    <p:calendar id="dataInicioCadastro" showOn="button" pattern="dd/MM/yyyy" mask="99/99/9999"
+                                placeholder="__/__/____" size="20" value="#{campanhaView.campanha.dataInicio}"
+                                required="true" requiredMessage="Data de inicío é obrigatória"/>
+                </div>
+
+                <div class="campo-opcional">
+                    <p:outputLabel for="dataFimCadastro" value="Data de término" styleClass="margin-label-bottom"/>
+                    <p:calendar id="dataFimCadastro" showOn="button" pattern="dd/MM/yyyy" mask="99/99/9999"
+                                placeholder="__/__/____" size="20" value="#{campanhaView.campanha.dataFim}"
+                                required="true" requiredMessage="Data de término é obrigatória"/>
+                </div>
+                <div class="campo-opcional">
+                    <p:outputLabel for="idadeMinimaCadastro" value="Idade mínima" styleClass="margin-label-bottom"/>
+                    <p:spinner id="idadeMinimaCadastro" size="15" value="#{campanhaView.campanha.idadeMinima}" min="0"
+                               required="true" requiredMessage="Idade mínima é obrigatória"/>
+                </div>
+                <div class="campo-opcional">
+                    <p:outputLabel for="idadeMaximaCadastro" value="Idade máxima" styleClass="margin-label-bottom"/>
+                    <p:spinner id="idadeMaximaCadastro" size="15" value="#{campanhaView.campanha.idadeMaxima}" min="0"
+                               required="true" requiredMessage="Idade máxima é obrigatória"/>
+                </div>
+                <div class="campo-opcional">
+                    <p:outputLabel for="horarioInicioDiaCadastro" value="Hora abertura"
+                                   styleClass="margin-label-bottom"/>
+                    <p:inputMask id="horarioInicioDiaCadastro" size="15" mask="99:99" required="true"
+                                 requiredMessage="Hora abertura é obrigatório" placeholder="__:__"
+                                 value="#{campanhaView.horariosCampanhaDTO.horarioInicioDiaTexto}"/>
+                </div>
+                <div class="campo-opcional">
+                    <p:outputLabel for="horarioFimDiaCadastro" value="Hora fechamento"
+                                   styleClass="margin-label-bottom"/>
+                    <p:inputMask id="horarioFimDiaCadastro" size="15" mask="99:99" required="true"
+                                 requiredMessage="Hora fechamento é obrigatório" placeholder="__:__"
+                                 value="#{campanhaView.horariosCampanhaDTO.horarioFimDiaTexto}"/>
+                </div>
+            </div>
+
+            <p:outputPanel>
+                <div class="ui-fluid p-formgrid p-grid">
+                    <div class="p-field p-col-12 p-md-8">
+                        <p:outputLabel for="localCadastro" value="Pesquise locais no município"
+                                       styleClass="margin-label-bottom"/>
+                        <p:autoComplete id="localCadastro" value="#{campanhaView.localEscolhido}"
+                                        converter="localConverter"
+                                        completeMethod="#{campanhaView.buscarLocaisPorDescricao}" var="local"
+                                        itemValue="#{local}" itemLabel="#{local.descricao}" minQueryLength="1"
+                                        scrollHeight="250" disabled="#{campanhaView.campanha.municipio.id == null}"/>
+                    </div>
+
+                    <div class="p-field p-col-12 p-md-2">
+                        <p:commandButton id="btnAdicionaLocal" icon="fa fa-check" value="Adicionar"
+                                         style="margin-top: 27px;"
+                                         action="#{campanhaView.adicionarLocalNaCampanha}"
+                                         process="@this localCadastro" update="mensagem localCadastro tabLocais"
+                                         disabled="#{campanhaView.campanha.municipio.id == null}"/>
+                    </div>
+
+                    <div class="p-field p-col-12 p-md-2">
+                        <p:commandButton id="btnNovoLocal" icon="fa fa-plus" value="Novo Local"
+                                         style="margin-top: 27px;" process="@this"
+                                         action="#{campanhaView.abrirDialogoNovoLocal}"
+                                         disabled="#{campanhaView.campanha.municipio.id == null}"/>
+                    </div>
+                </div>
+            </p:outputPanel>
+
+            <p:outputPanel id="panelTabLocais" style="margin-top: 25px;">
+                <p:dataTable id="tabLocais" widgetVar="tabLocais" value="#{campanhaView.campanha.locais}"
+                             var="local" emptyMessage="Adicione um ou mais locais" scrollHeight="250">
+                    <p:column headerText="Descrição">
+                        <p:outputLabel value="#{local.descricao}"/>
+                    </p:column>
+                    <p:column headerText="CEP">
+                        <p:outputLabel value="#{local.cep}"/>
+                    </p:column>
+                    <p:column headerText="Bairro">
+                        <p:outputLabel value="#{local.bairro}"/>
+                    </p:column>
+                    <p:column headerText="Rua">
+                        <p:outputLabel value="#{local.rua}"/>
+                    </p:column>
+                    <p:column headerText="Número">
+                        <p:outputLabel value="#{local.numero}"/>
+                    </p:column>
+                    <p:column headerText="Remover">
+                        <p:commandButton icon="fa fa-trash" update="tabLocais" process="@this"
+                                         action="#{campanhaView.removerLocalDaCampanha}">
+                            <f:setPropertyActionListener target="#{campanhaView.localEscolhido}" value="#{local}"/>
+                        </p:commandButton>
+                    </p:column>
+                </p:dataTable>
+            </p:outputPanel>
+
+            <div class="botoes-dialogo">
+                <p:commandButton icon="fa fa-close" value="Cancelar" styleClass="botao-cancelar"
+                                 onclick="PF('dlgCadastroCampanha').hide()">
+                    <p:ajax resetValues="true" update="@form"/>
+                </p:commandButton>
+                <p:commandButton icon="fa fa-save" value="Cadastrar" styleClass="botao-gravar"
+                                 action="#{campanhaView.cadastrarCampanha}"
+                                 update="@form, mensagem, :formTabCampanhas:tabCampanhas"/>
+            </div>
+        </h:form>
+    </p:dialog>
+
+    <p:dialog id="dlgDetalheCampanha" widgetVar="dlgDetalheCampanha" modal="true" resizable="false"
+              header="Detalhes da Campanha" closable="false" draggable="false" responsive="true"
+              position="center" onShow="PF('dlgDetalheCampanha').initPosition()">
+
+        <h:form id="formDetalheCampanha">
+            <div class="container-detalhe">
+                <p:panelGrid columns="1">
+                    <p:column>
+                        <p:outputLabel value="Nome: #{campanhaView.campanha.nome}"/>
+                    </p:column>
+
+                    <p:column>
+                        <div class="descricao-detalhe">
+                            <p:outputLabel value="Descrição: #{campanhaView.campanha.descricao}"/>
+                        </div>
+                    </p:column>
+
+                    <p:column>
+                        <p:outputLabel value="Município: #{campanhaView.campanha.municipio.nome}"/>
+                    </p:column>
+
+                    <p:column>
+                        <p:outputLabel value="Vacina: #{campanhaView.campanha.vacina.nome}"/>
+                    </p:column>
+
+                    <p:column>
+                        <p:outputLabel value="Período: "/>
+                        <p:outputLabel value="#{campanhaView.campanha.dataFim}"
+                                       rendered="#{campanhaView.campanha.dataInicio != null}">
+                            <f:convertDateTime pattern="yyyy-MM-dd"/>
+                        </p:outputLabel>
+
+                        <p:outputLabel value=" - "/>
+
+                        <p:outputLabel value="#{campanhaView.campanha.dataFim}"
+                                       rendered="#{campanhaView.campanha.dataFim != null}">
+                            <f:convertDateTime pattern="yyyy-MM-dd"/>
+                        </p:outputLabel>
+                    </p:column>
+
+                    <p:column>
+                        <p:outputLabel value="Horários: #{campanhaView.campanha.horarioInicioDia} -
+                            #{campanhaView.campanha.horarioFimDia}"/>
+                    </p:column>
+
+                    <p:column>
+                        <p:outputLabel value="Idade: #{campanhaView.campanha.idadeMinima} -
+                            #{campanhaView.campanha.idadeMaxima}"/>
+                    </p:column>
+
+                    <p:column>
+                        <p:outputLabel value="Locais: "/><br/><br/>
+                        <p:repeat value="#{campanhaView.campanha.locais}" var="enderecoLocal">
+                            <p:outputLabel value="#{enderecoLocal.exibirEndereco()}"/><br/><br/>
+                        </p:repeat>
+                    </p:column>
+                </p:panelGrid>
+            </div>
+
+            <div class="botao-detalhe">
+                <p:commandButton value="Fechar" icon="fa fa-close" onclick="PF('dlgDetalheCampanha').hide()"/>
+            </div>
+        </h:form>
+
+
+    </p:dialog>
+
+    <p:dialog id="dlgAtualizaCampanha" widgetVar="dlgAtualizaCampanha" modal="true" resizable="false"
+              header="Editar Campanha" closable="false" height="80vh" width="90vw">
+        <h:form id="formAtualizaCampanha">
+            <p:outputPanel styleClass="agrupamento-input">
+                <p:outputLabel for="nomeAtualiza" value="Nome" styleClass="margin-label-bottom"/>
+                <p:inputText id="nomeAtualiza" required="true" style="width: 100%;"
+                             requiredMessage="Nome da campanha é obrigatório"
+                             value="#{campanhaView.campanha.nome}"/>
+            </p:outputPanel>
+            <p:outputPanel styleClass="agrupamento-input">
+                <p:outputPanel>
+                    <p:outputLabel for="descricaoAtualiza" value="Descrição" styleClass="margin-label-bottom"/>
+                    <p:inputTextarea id="descricaoAtualiza" autoResize="true" styleClass="campo-descricao"
+                                     required="true"
+                                     requiredMessage="Descrição da campanha é obrigatório"
+                                     value="#{campanhaView.campanha.descricao}"/>
+                </p:outputPanel>
+            </p:outputPanel>
+
+            <div class="agrupar-select">
+                <div class="componente-flex">
+                    <p:outputLabel for="municipioAtualiza" value="Município" styleClass="margin-label-bottom"/>
+                    <p:selectOneMenu id="municipioAtualiza" filter="true" styleClass="selects"
+                                     filterMatchMode="contains" required="true"
+                                     requiredMessage="Município da campanha é obrigatório"
+                                     value="#{campanhaView.campanha.municipio.id}">
+
+                        <f:selectItem itemLabel="Selecione um município" itemDisabled="true"/>
+                        <f:selectItems value="#{campanhaView.listaDeMunicipios}" var="municipio"
+                                       itemLabel="#{municipio.nome}" itemValue="#{municipio.id}"/>
+
+                        <p:ajax process="@this"
+                                update="@this localAtualiza, btnAdicionaLocalAtualiza, btnNovoLocalAtualiza"/>
+                    </p:selectOneMenu>
+                </div>
+
+                <div class="componente-flex">
+                    <p:outputLabel for="vacinaAtualiza" value="Vacina" styleClass="margin-label-bottom"/>
+                    <p:selectOneMenu id="vacinaAtualiza" styleClass="selects" filter="true" filterMatchMode="contains"
+                                     required="true" requiredMessage="Vacina da campanha é obrigatório"
+                                     value="#{campanhaView.campanha.vacina.id}">
+                        <f:selectItem itemLabel="Selecione uma vacina" itemValue="#{null}"/>
+                        <f:selectItems value="#{campanhaView.listaDeVacinas}" var="vacina" itemLabel="#{vacina.nome}"
+                                       itemValue="#{vacina.id}"/>
+                    </p:selectOneMenu>
+                </div>
+            </div>
+
+            <div class="agrupar-opicional">
+                <div class="campo-opcional">
+                    <p:outputLabel for="dataInicioAtualiza" value="Data de inicío" styleClass="margin-label-bottom"/>
+                    <p:calendar id="dataInicioAtualiza" showOn="button" pattern="dd/MM/yyyy" mask="99/99/9999"
+                                placeholder="__/__/____" size="20" value="#{campanhaView.campanha.dataInicio}"
+                                required="true" requiredMessage="Data de inicío é obrigatória"/>
+                </div>
+
+                <div class="campo-opcional">
+                    <p:outputLabel for="dataFimAtualiza" value="Data de término" styleClass="margin-label-bottom"/>
+                    <p:calendar id="dataFimAtualiza" showOn="button" pattern="dd/MM/yyyy" mask="99/99/9999"
+                                placeholder="__/__/____" size="20" value="#{campanhaView.campanha.dataFim}"
+                                required="true" requiredMessage="Data de término é obrigatória"/>
+                </div>
+                <div class="campo-opcional">
+                    <p:outputLabel for="idadeMinimaAtualiza" value="Idade mínima" styleClass="margin-label-bottom"/>
+                    <p:spinner id="idadeMinimaAtualiza" size="15" value="#{campanhaView.campanha.idadeMinima}" min="0"
+                               required="true" requiredMessage="Idade mínima é obrigatória"/>
+                </div>
+                <div class="campo-opcional">
+                    <p:outputLabel for="idadeMaximaAtualiza" value="Idade máxima" styleClass="margin-label-bottom"/>
+                    <p:spinner id="idadeMaximaAtualiza" size="15" value="#{campanhaView.campanha.idadeMaxima}" min="0"
+                               required="true" requiredMessage="Idade máxima é obrigatória"/>
+                </div>
+                <div class="campo-opcional">
+                    <p:outputLabel for="horarioInicioDiaAtualiza" value="Hora abertura"
+                                   styleClass="margin-label-bottom"/>
+                    <p:inputMask id="horarioInicioDiaAtualiza" size="15" mask="99:99" required="true"
+                                 requiredMessage="Hora abertura é obrigatório" placeholder="__:__"
+                                 value="#{campanhaView.horariosCampanhaDTO.horarioInicioDiaTexto}"/>
+                </div>
+                <div class="campo-opcional">
+                    <p:outputLabel for="horarioFimDiaAtualiza" value="Hora fechamento"
+                                   styleClass="margin-label-bottom"/>
+                    <p:inputMask id="horarioFimDiaAtualiza" size="15" mask="99:99" required="true"
+                                 requiredMessage="Hora fechamento é obrigatório" placeholder="__:__"
+                                 value="#{campanhaView.horariosCampanhaDTO.horarioFimDiaTexto}"/>
+                </div>
+            </div>
+
+            <p:outputPanel>
+                <div class="ui-fluid p-formgrid p-grid">
+                    <div class="p-field p-col-12 p-md-8">
+                        <p:outputLabel for="localAtualiza" value="Pesquise locais no município"
+                                       styleClass="margin-label-bottom"/>
+                        <p:autoComplete id="localAtualiza" value="#{campanhaView.localEscolhido}"
+                                        converter="localConverter"
+                                        completeMethod="#{campanhaView.buscarLocaisPorDescricao}" var="local"
+                                        itemValue="#{local}" itemLabel="#{local.descricao}" minQueryLength="1"
+                                        scrollHeight="250" disabled="#{campanhaView.campanha.municipio.id == null}"/>
+                    </div>
+
+                    <div class="p-field p-col-12 p-md-2">
+                        <p:commandButton id="btnAdicionaLocalAtualiza" icon="fa fa-check" value="Adicionar"
+                                         style="margin-top: 27px;"
+                                         action="#{campanhaView.adicionarLocalNaCampanha}"
+                                         process="@this localAtualiza" update="mensagem localAtualiza tabLocaisAtualiza"
+                                         disabled="#{campanhaView.campanha.municipio.id == null}"/>
+                    </div>
+
+                    <div class="p-field p-col-12 p-md-2">
+                        <p:commandButton id="btnNovoLocalAtualiza" icon="fa fa-plus" value="Novo Local"
+                                         style="margin-top: 27px;"
+                                         action="#{campanhaView.abrirDialogoNovoLocal}"
+                                         disabled="#{campanhaView.campanha.municipio.id == null}"/>
+                    </div>
+                </div>
+            </p:outputPanel>
+
+            <p:outputPanel id="panelTabLocaisAtualiza" style="margin-top: 25px;">
+                <p:dataTable id="tabLocaisAtualiza" widgetVar="tabLocais" value="#{campanhaView.campanha.locais}"
+                             var="local" emptyMessage="Adicione um ou mais locais" scrollHeight="250">
+                    <p:column headerText="Descrição">
+                        <p:outputLabel value="#{local.descricao}"/>
+                    </p:column>
+                    <p:column headerText="CEP">
+                        <p:outputLabel value="#{local.cep}"/>
+                    </p:column>
+                    <p:column headerText="Bairro">
+                        <p:outputLabel value="#{local.bairro}"/>
+                    </p:column>
+                    <p:column headerText="Rua">
+                        <p:outputLabel value="#{local.rua}"/>
+                    </p:column>
+                    <p:column headerText="Número">
+                        <p:outputLabel value="#{local.numero}"/>
+                    </p:column>
+                    <p:column headerText="Remover">
+                        <p:commandButton icon="fa fa-trash" update="tabLocaisAtualiza" process="@this"
+                                         action="#{campanhaView.removerLocalDaCampanha}">
+                            <f:setPropertyActionListener target="#{campanhaView.localEscolhido}" value="#{local}"/>
+                        </p:commandButton>
+                    </p:column>
+                </p:dataTable>
+            </p:outputPanel>
+
+            <div class="botoes-dialogo">
+                <p:commandButton icon="fa fa-close" value="Cancelar" styleClass="botao-cancelar"
+                                 onclick="PF('dlgAtualizaCampanha').hide()">
+                    <p:ajax resetValues="true" update="@form"/>
+                </p:commandButton>
+                <p:commandButton icon="fa fa-save" value="Atualizar" styleClass="botao-gravar"
+                                 action="#{campanhaView.atualizarCampanha}"
+                                 update="@form, mensagem, :formTabCampanhas:tabCampanhas"/>
+            </div>
+        </h:form>
+    </p:dialog>
+
+    <p:dialog id="dlgConfirmacaoFinalizarCampanha" widgetVar="dlgConfirmacaoFinalizarCampanha" modal="true"
+              closable="false"
+              header="Deseja realmente finalizar a campanha?" resizable="false">
+        <h:form id="formConfirmaFinalizarCampanha">
+            <div class="botoes-dialogo">
+                <p:commandButton icon="fa fa-close" value="Cancelar" styleClass="botao-gravar"
+                                 onclick="PF('dlgConfirmacaoFinalizarCampanha').hide()"/>
+                <p:commandButton icon="fa fa-check" value="Finalizar" styleClass="botao-cancelar"
+                                 action="#{campanhaView.finalizarCampanha}"
+                                 onclick="PF('dlgConfirmacaoFinalizarCampanha').hide()"
+                                 update=":formTabCampanhas:tabCampanhas, mensagem, :formTabCampanhas:tabCampanhas"/>
+            </div>
+        </h:form>
+    </p:dialog>
+
+    <p:dialog id="dlgNovoLocal" widgetVar="dlgNovoLocal" modal="true" responsive="true" closable="false"
+              resizable="false" header="Cadastro de Local" width="70%">
+        <h:form id="formNovoLocal">
+            <div class="ui-fluid p-formgrid p-grid">
+                <div class="p-field p-col-12 p-md-12">
+                    <p:outputLabel for="descricaoNovoLocal" value="Descrição"/>
+                    <p:inputText id="descricaoNovoLocal" value="#{campanhaView.localEscolhido.descricao}"/>
+                </div>
+                <div class="p-field p-col-12 p-md-2 centro-texto-input">
+                    <p:outputLabel for="cepNovoLocal" value="CEP"/>
+                    <p:inputMask id="cepNovoLocal" mask="99999-999" value="#{campanhaView.localEscolhido.cep}"/>
+                </div>
+                <div class="p-field p-col-12 p-md-4">
+                    <p:outputLabel for="bairroNovoLocal" value="Bairro"/>
+                    <p:inputText id="bairroNovoLocal" value="#{campanhaView.localEscolhido.bairro}"/>
+                </div>
+                <div class="p-field p-col-12 p-md-4">
+                    <p:outputLabel for="ruaNovoLocal" value="Rua"/>
+                    <p:inputText id="ruaNovoLocal" value="#{campanhaView.localEscolhido.rua}"/>
+                </div>
+                <div class="p-field p-col-12 p-md-2 centro-texto-input">
+                    <p:outputLabel for="numeroNovoLocal" value="Número"/>
+                    <p:inputText id="numeroNovoLocal" value="#{campanhaView.localEscolhido.numero}"/>
+                </div>
+            </div>
+
+            <div class="botoes-dialogo">
+                <p:commandButton icon="fa fa-close" value="Cancelar" styleClass="botao-cancelar"
+                                 onclick="PF('dlgNovoLocal').hide()">
+                    <p:ajax resetValues="true" update="@form"/>
+                </p:commandButton>
+                <p:commandButton icon="fa fa-check" value="Cadastrar" styleClass="botao-gravar"
+                                 action="#{campanhaView.cadastrarNovoLocal}"
+                                 update="@form :formCadastroCampanha:tabLocais
+                                        :formAtualizaCampanha:tabLocaisAtualiza mensagem"/>
+            </div>
+        </h:form>
+    </p:dialog>
+
+    <p:separator style="margin-top: 30px"/>
+    <div class="rodape">
+        <p:outputLabel value="Edvan Oliveira - edvan.oliveiract@gmail.com" styleClass="info-rodape"/>
+        <p:outputLabel value="Pedro Felipe - pedrofelipem.contato@gmail.com" styleClass="info-rodape"/>
+    </div>
+</h:body>
+</html>
